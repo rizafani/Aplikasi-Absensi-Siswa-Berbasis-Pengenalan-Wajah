@@ -1,0 +1,140 @@
+{
+  "entities": {
+    "ClassConfig": {
+      "title": "ClassConfig",
+      "description": "Configuration and operational settings for the classroom attendance system",
+      "type": "object",
+      "properties": {
+        "schoolName": { "type": "string", "description": "Name of the school" },
+        "activeClassId": { "type": "string", "description": "Currently active class ID" },
+        "academicYear": { "type": "string", "description": "Academic school year" },
+        "presentStartTime": { "type": "string", "description": "Start time for present status" },
+        "presentEndTime": { "type": "string", "description": "Cutoff time for on-time present status" },
+        "lateEndTime": { "type": "string", "description": "Cutoff time for late status" },
+        "afterLateStatus": { "type": "string", "enum": ["terlambat", "alpa"] },
+        "livenessEnabled": { "type": "boolean" },
+        "soundEnabled": { "type": "boolean" },
+        "autoCaptureCooldown": { "type": "number" },
+        "recognitionThreshold": { "type": "number" }
+      },
+      "required": ["schoolName", "academicYear", "presentEndTime", "lateEndTime"]
+    },
+    "ClassItem": {
+      "title": "ClassItem",
+      "description": "Classroom definition for multi-class school management",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "academicYear": { "type": "string" },
+        "presentEndTime": { "type": "string" },
+        "lateEndTime": { "type": "string" },
+        "room": { "type": "string" }
+      },
+      "required": ["id", "name", "teacherName"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student biometric and academic record for a class",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nis": { "type": "string" },
+        "nisn": { "type": "string" },
+        "name": { "type": "string" },
+        "gender": { "type": "string", "enum": ["L", "P"] },
+        "classId": { "type": "string" },
+        "className": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "faceRegistered": { "type": "boolean" },
+        "faceDescriptors": { "type": "array" },
+        "faceDescriptorsJson": { "type": "string" },
+        "registeredAt": { "type": "string" },
+        "phone": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "nis", "name", "gender", "faceRegistered"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Single daily attendance record for a student in a class",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "nis": { "type": "string" },
+        "classId": { "type": "string" },
+        "className": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["hadir", "terlambat", "sakit", "izin", "alpa"] },
+        "method": { "type": "string", "enum": ["face_recognition", "manual"] },
+        "confidence": { "type": "number" },
+        "snapshotUrl": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "studentId", "studentName", "nis", "date", "time", "status", "method"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "System operational and security audit log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "action": { "type": "string" },
+        "detail": { "type": "string" },
+        "actor": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "action", "detail", "actor"]
+    },
+    "LessonScheduleItem": {
+      "title": "LessonScheduleItem",
+      "description": "Class schedule per lesson hour (jam pelajaran)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "classId": { "type": "string" },
+        "className": { "type": "string" },
+        "day": { "type": "string", "enum": ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] },
+        "jamKe": { "type": "number" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "lateToleranceMinutes": { "type": "number" },
+        "subject": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "room": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "classId", "day", "jamKe", "startTime", "endTime", "subject"]
+    }
+  },
+  "firestore": {
+    "/config/{configId}": {
+      "schema": "ClassConfig",
+      "description": "System configuration metadata"
+    },
+    "/classes/{classId}": {
+      "schema": "ClassItem",
+      "description": "Multiple classes in the school"
+    },
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Students belonging to classes"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "AttendanceRecord",
+      "description": "Daily attendance logs per student and class"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit and operational activity logs"
+    },
+    "/lesson_schedules/{scheduleId}": {
+      "schema": "LessonScheduleItem",
+      "description": "Lesson hour schedules per class"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "ABSENSI KELAS - Presensi Pengenalan Wajah",
+  "description": "Aplikasi Presensi Siswa Satu Kelas Berbasis Pengenalan Wajah (Face Recognition) yang modern, akurat, dan mudah digunakan guru.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

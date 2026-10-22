@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // System & School Configuration
+    match /config/{configId} {
+      allow get: if isValidId(configId);
+      allow list: if true;
+      allow create, update: if isValidId(configId) &&
+        incoming().schoolName is string;
+      allow delete: if false;
+    }
+
+    // Classes Collection (Multi-Class Support)
+    match /classes/{classId} {
+      allow get: if isValidId(classId);
+      allow list: if true;
+      allow create, update: if isValidId(classId) &&
+        incoming().name is string && incoming().name.size() > 0 &&
+        incoming().teacherName is string;
+      allow delete: if isValidId(classId);
+    }
+
+    // Students Collection
+    match /students/{studentId} {
+      allow get: if isValidId(studentId);
+      allow list: if true;
+      allow create, update: if isValidId(studentId) &&
+        incoming().name is string && incoming().name.size() > 0 &&
+        incoming().nis is string && incoming().nis.size() > 0 &&
+        incoming().gender in ['L', 'P'] &&
+        incoming().faceRegistered is bool;
+      allow delete: if isValidId(studentId);
+    }
+
+    // Daily Attendance Records
+    match /attendance/{attendanceId} {
+      allow get: if isValidId(attendanceId);
+      allow list: if true;
+      allow create: if isValidId(attendanceId) &&
+        incoming().studentId is string &&
+        incoming().studentName is string &&
+        incoming().date is string &&
+        incoming().status in ['hadir', 'terlambat', 'sakit', 'izin', 'alpa'] &&
+        incoming().method in ['face_recognition', 'manual'];
+      allow update: if isValidId(attendanceId) &&
+        incoming().status in ['hadir', 'terlambat', 'sakit', 'izin', 'alpa'];
+      allow delete: if isValidId(attendanceId);
+    }
+
+    // Audit and Activity Logs
+    match /audit_logs/{logId} {
+      allow get: if isValidId(logId);
+      allow list: if true;
+      allow create: if isValidId(logId) &&
+        incoming().action is string &&
+        incoming().detail is string;
+      allow update, delete: if false;
+    }
+
+    // Lesson Schedules Collection (Per-Class Jadwal Pelajaran)
+    match /lesson_schedules/{scheduleId} {
+      allow get: if isValidId(scheduleId);
+      allow list: if true;
+      allow create, update: if isValidId(scheduleId) &&
+        incoming().classId is string && incoming().classId.size() > 0 &&
+        incoming().day in ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] &&
+        incoming().jamKe is number &&
+        incoming().startTime is string &&
+        incoming().endTime is string &&
+        incoming().subject is string && incoming().subject.size() > 0;
+      allow delete: if isValidId(scheduleId);
+    }
+  }
+}
